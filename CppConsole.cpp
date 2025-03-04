@@ -5,6 +5,8 @@
 #include "CppConsole.h"
 
 #include <utility>
+#include <cstring>
+
 extern "C" {
 #include "uart-console.h"
 #include "telnetd-bsd.h"
@@ -12,10 +14,10 @@ extern "C" {
 
 using namespace std;
 
-Console::Console(Console::ConsoleType type, function<void(vector<string>)> processor,  function<void (void)> onConnect)
+Console::Console(Console::ConsoleType type, std::function<void(std::vector<std::string>)> processor,  function<void (void)> onConnect)
 {
     m_type = type;
-    m_process = std::move(processor);
+    m_process = processor;
     if (onConnect)
         m_onConnect = std::move(onConnect);
 
@@ -30,6 +32,7 @@ Console::Console(Console::ConsoleType type, function<void(vector<string>)> proce
         c_handlers.set_new_connection_cb = telnetd_set_new_connection_cb;
         c_handlers.process_command_cb = &processCommandThunk;
         c_handlers.new_connection_cb = &connectHandlerThunk;
+        c_handlers.user_data = this;
         console_set_handlers(&c_handlers);
     }
     else
@@ -42,6 +45,7 @@ Console::Console(Console::ConsoleType type, function<void(vector<string>)> proce
         c_handlers.set_new_connection_cb = uart_set_new_connection_cb;
         c_handlers.process_command_cb = &processCommandThunk;
         c_handlers.new_connection_cb = &connectHandlerThunk;
+        c_handlers.user_data = this;
         console_set_handlers(&c_handlers);
     }
 
@@ -60,9 +64,15 @@ void Console::connectHandlerThunk(void *user_data)
 
 void Console::processCommandThunk(int argc, char **argv, void *user_data)
 {
-    vector<string> args(argc);
+    // Force copy because the argv[] array will be freed as soon as this returns
+    vector<string> args;
     for (int i = 0 ; i < argc ; i++)
-        args[i] = argv[i];
+    {
+        string s;
+        s.resize(strlen(argv[i]));
+        strcpy(s.data(), argv[i]);
+        args.push_back(s);
+    }
 
     if (args.size() == 1 && args[0] == "quit")
     {
@@ -70,5 +80,6 @@ void Console::processCommandThunk(int argc, char **argv, void *user_data)
         return;
     }
 
-    ((Console *)user_data)->m_process(args);
+    if (user_data)
+        ((Console *)user_data)->m_process(args);
 }

@@ -20,7 +20,7 @@ public:
         TelnetConsole,
         UartConsole
     };
-    Console(ConsoleType type, std::function<void(std::vector<std::string>)> processor, std::function<void (void)> onConnect = {});
+    Console(ConsoleType type, std::function<void(std::vector<std::string>)>, std::function<void (void)> onConnect = {});
 
 private:
     void connectHandler();
@@ -31,6 +31,7 @@ private:
     ConsoleType m_type;
     struct console_handlers c_handlers = {};
 
+//    void (*m_process)(std::vector<std::string>) = nullptr;
     std::function<void(std::vector<std::string>)> m_process;
     std::function<void (void)> m_onConnect = [this] { connectHandler(); };
 };
