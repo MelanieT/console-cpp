@@ -23,15 +23,15 @@ extern "C" {
 
 using namespace std;
 
-Console::Console(Console::ConsoleType type, std::function<void(std::vector<std::string>)> processor,  function<void (void)> onConnect)
+void Console::init(ConsoleType type, std::function<void(std::vector<std::string>)> processor, std::function<void (void)> onConnect)
 {
     m_type = type;
-    m_process = processor;
+    m_process = std::move(processor);
     if (onConnect)
         m_onConnect = std::move(onConnect);
 
 #ifdef CONFIG_CPP_CONSOLE_TELNET
-    if (type == TelnetConsole)
+    if (m_type == TelnetConsole)
     {
         telnetd_init(23);
 
@@ -47,7 +47,7 @@ Console::Console(Console::ConsoleType type, std::function<void(std::vector<std::
     }
 #endif
 #ifdef CONFIG_CPP_CONSOLE_UART
-    if (type == UartConsole)
+    if (m_type == UartConsole)
     {
         uart_init();
         c_handlers.send = uart_send;
