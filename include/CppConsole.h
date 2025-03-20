@@ -17,8 +17,12 @@ class Console
 public:
     enum ConsoleType
     {
+#ifdef CONFIG_CPP_CONSOLE_TELNET
         TelnetConsole,
-        UartConsole
+#endif
+#ifdef CONFIG_CPP_CONSOLE_UART
+        UartConsole,
+#endif
     };
     Console(ConsoleType type, std::function<void(std::vector<std::string>)>, std::function<void (void)> onConnect = {});
 

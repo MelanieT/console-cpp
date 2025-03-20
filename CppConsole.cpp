@@ -7,9 +7,18 @@
 #include <utility>
 #include <cstring>
 
+// This is evil. It subverts the IDF build system, but that can't be helped
+// Without this, we would have to have both consoles in the tree and being
+// built even if one isn't used. These paths should be ok to use since I
+// maintain all packages involved.
+
 extern "C" {
-#include "uart-console.h"
-#include "telnetd-bsd.h"
+#ifdef CONFIG_CPP_CONSOLE_UART
+    #include "../uart-console/include/uart-console.h"
+#endif
+#ifdef CONFIG_CPP_CONSOLE_TELNET
+    #include "../telnetd-bsd/include/telnetd-bsd.h"
+#endif
 }
 
 using namespace std;
@@ -21,6 +30,7 @@ Console::Console(Console::ConsoleType type, std::function<void(std::vector<std::
     if (onConnect)
         m_onConnect = std::move(onConnect);
 
+#ifdef CONFIG_CPP_CONSOLE_TELNET
     if (type == TelnetConsole)
     {
         telnetd_init(23);
@@ -35,7 +45,9 @@ Console::Console(Console::ConsoleType type, std::function<void(std::vector<std::
         c_handlers.user_data = this;
         console_set_handlers(&c_handlers);
     }
-    else
+#endif
+#ifdef CONFIG_CPP_CONSOLE_UART
+    if (type == UartConsole)
     {
         uart_init();
         c_handlers.send = uart_send;
@@ -48,6 +60,7 @@ Console::Console(Console::ConsoleType type, std::function<void(std::vector<std::
         c_handlers.user_data = this;
         console_set_handlers(&c_handlers);
     }
+#endif
 
     console_init();
 }
