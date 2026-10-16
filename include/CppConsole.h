@@ -33,7 +33,7 @@ private:
 
 //    void (*m_process)(std::vector<std::string>) = nullptr;
     std::function<void(std::vector<std::string>)> m_process;
-    std::function<void (void)> m_onConnect = [this] { connectHandler(); };
+    std::function<void (void)> m_onConnect;
 };
 
 

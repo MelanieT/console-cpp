@@ -54,7 +54,9 @@ Console::Console(Console::ConsoleType type, std::function<void(std::vector<std::
 
 void Console::connectHandler()
 {
-
+    // E.g. a banner, printed before the console's own lines
+    if (m_onConnect)
+        m_onConnect();
 }
 
 void Console::connectHandlerThunk(void *user_data)
