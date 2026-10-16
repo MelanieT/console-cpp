@@ -1,4 +1,4 @@
-idf_component_register(SRCS "CppConsole.cpp"
+idf_component_register (SRCS "CppConsole.cpp"
     INCLUDE_DIRS ./include
-    REQUIRES base_console telnetd-bsd uart-console
+    REQUIRES base_console
     )

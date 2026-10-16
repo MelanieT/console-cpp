@@ -1,0 +1,10 @@
+menu "console-cpp Settings"
+
+config CPP_CONSOLE_TELNET
+    bool "Include telnet support"
+    default y
+
+config CPP_CONSOLE_UART
+    bool "Include uart support"
+
+endmenu
